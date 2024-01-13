@@ -3,11 +3,14 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import {errorHandler} from './middlewares/error.js';
 const app = express();
+import path from 'path';
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
 }))
+
+const __dirname = path.resolve()
 
 // app.use(cors)
 
@@ -15,6 +18,12 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, '/Frontend/dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Frontend', 'dist', 'index.html'));
+  });
 
 //router import
 import userRouter from './routes/user.route.js';
