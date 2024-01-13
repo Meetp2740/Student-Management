@@ -6,19 +6,20 @@ import path from 'path';
 
 const app = express();
 
-const __dirname = path.resolve();
-
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
-  credentials: true,
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
 }))
 
-// Serve static files from the 'Frontend/build' directory
-app.use(express.static(path.join(__dirname, 'Frontend', 'build')));
+const __dirname = path.resolve();
 
-// Route all other requests to the index.html file in 'Frontend/build'
+// Determine the correct path for serving static files in production
+const publicPath = process.env.NODE_ENV === 'production' ? '/opt/render/project/src/Frontend/build' : path.join(__dirname, 'Frontend', 'build');
+app.use(express.static(publicPath));
+
+// Route all other requests to the index.html file
 app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, 'Frontend', 'build', 'index.html'))
+  res.sendFile(path.join(publicPath, 'index.html'))
 );
 
 app.use(express.static('public'));
