@@ -10,7 +10,13 @@ app.use(cors({
     credentials: true,
 }))
 
-const __dirname = path.resolve()
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, "/Frontend/dist")));
+app.get("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "/Frontend/dist/index.html"))
+);
+
+console.log(__dirname)
 
 // app.use(cors)
 

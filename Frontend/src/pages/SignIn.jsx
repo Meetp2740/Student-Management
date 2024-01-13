@@ -37,6 +37,7 @@ function SignIn() {
                 },
                 body: JSON.stringify(Form)
             })
+            console.log(res.url)
             const data = await res.json()
             if (data.success == false) {
                 dispatch(SignInFail(data.message))
@@ -49,8 +50,6 @@ function SignIn() {
             dispatch(SignInFail("Server Error, Please Try Again"))
         }
     }
-
-    console.log(currentUser)
 
     return (
         <div className='max-w-lg mx-auto p-3'>

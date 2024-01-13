@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon Backend/src/index.js",
-    "start": "node Backend/src/index.js"
+    "start": "node Backend/src/index.js",
+    "build": "cd Backend && npm install  && cd ../Frontend && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
