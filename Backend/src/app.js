@@ -14,8 +14,9 @@ app.use(cors({
 const __dirname = path.resolve();
 
 // Determine the correct path for serving static files in production
-const publicPath = process.env.NODE_ENV === 'production' ? '/opt/render/project/src/Frontend/build' : path.join(__dirname, 'Frontend', 'build');
+const publicPath = process.env.NODE_ENV === 'production' ? '/opt/render/project/src/Frontend/dist' : path.join(__dirname, 'Frontend', 'dist');
 app.use(express.static(publicPath));
+console.log(publicPath)
 
 // Route all other requests to the index.html file
 app.get('*', (req, res) =>
