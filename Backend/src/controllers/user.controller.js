@@ -25,9 +25,7 @@ const generateAccessAndRefereshTokens = async (userId) => {
     }
 
     catch (error) {
-
         next(new ApiError(500, "Internal Server Error"))
-
     }
 }
 
@@ -53,7 +51,7 @@ export const userLogin = asyncHandler(async (req, res, next) => {
 
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
 
-    const loggedInUser = await User.findById(user._id).select("-Password -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-Password")
 
     const options = {
         httpOnly: true,
@@ -154,7 +152,7 @@ export const studentRegister = asyncHandler(async (req, res, next) => {
     }
 })
 
-export const adminRegister = asyncHandler(async (req, res, next) => {
+export const adminRegister = asyncHandler(async (req, res, next) => {   
 
     const { FirstName, Password, Email, ContactNumber, Role, LastName, Address, Department, BirthDate, Gender, Avatar } = req.body;
 

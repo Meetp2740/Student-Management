@@ -72,8 +72,8 @@ function App() {
         <div style={{ flex: 1 }}>
           <Routes>
             <Route path='/' element={<Home />}></Route>
-            <Route path='/sign-in' element={<SignIn />}></Route>
-            {/* isLoggedIn ? <Navigate to="/" /> :  */}
+            <Route path='/sign-in' element={isLoggedIn ? <Navigate to="/" /> : <SignIn />}></Route>
+
             <Route path='*' element={<Errorpage />}></Route>
             <Route path='/about' element={<About />}></Route>
 

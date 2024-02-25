@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLogin } from '../context/LoginContext';
+import { Signout } from '../redux/slices/userSlice';
 
 
 function handle419Error(navigate, handleLogout) {
@@ -9,7 +10,7 @@ function handle419Error(navigate, handleLogout) {
 
     localStorage.removeItem('token');
     handleLogout();
-    console.log("done")
+    dispatch(Signout())
     navigate('/');
 }
 

@@ -25,24 +25,12 @@ export const userSlice = createSlice({
             state.error = action.payload;
         },
 
-        SignInStart: (state) => {
-            state.loading = true;
-            state.error = false;
-        },
         SignInSuccess: (state, action) => {
-            state.loading = false;
             state.currentUser = action.payload;
-            state.error = false;
-        },
-        SignInFail: (state, action) => {
-            state.loading = false;
-            state.error = action.payload;
         },
         Signout: (state) => {
             state.currentUser = null;
-            state.loading = null;
-            state.error = null;
-        }
+        },
     }
 })
 

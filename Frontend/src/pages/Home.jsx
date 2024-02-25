@@ -4,7 +4,7 @@ import img2 from '../images/s3.webp'
 
 function Home() {
   return (
-    <body>
+    <>
 
       {/* <!-- Hero Section --> */}
       <section className="relative h-screen">
@@ -33,7 +33,7 @@ function Home() {
           <p>&copy; 2024 Your Website. All rights reserved.</p>
         </div>
       </footer>
-    </body>
+    </>
   )
 }
 
