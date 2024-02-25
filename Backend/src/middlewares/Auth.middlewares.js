@@ -6,20 +6,18 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 export const verify = asyncHandler(async(req, res, next) => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") 
-        console.log(token)
     
         if (!token) 
-            next(new ApiError(401, 'Access denied!'))
+            next(new ApiError(419, 'Access denied!'))
     
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
             
-            if(err) next(new ApiError(403, 'token is not valid'));
+            if(err) next(new ApiError(419, 'token is not valid'));
             
-            // console.log(req.get("authorization"))
             req.user = user;
-            next();
+            next(); 
         })
     } catch (error) {
-        next(new ApiError(401, error?.message || "Invalide access token"))
+        next(new ApiError(419, error?.message || "Invalide access token"))
     }
 });

@@ -3,6 +3,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { SignInStart, SignInSuccess, SignInFail, resetUserState } from '../redux/slices/userSlice'
+import { useMutation } from '@tanstack/react-query'
 
 
 function SignIn() {
@@ -26,43 +27,50 @@ function SignIn() {
         };
     }, []);
 
-    const submitHandler = async (e) => {
-        e.preventDefault()
-        try {
-            dispatch(SignInStart())
-            const res = await fetch('api/v1/user/login', {
+    const { mutate: login, isLoading, error: loginError, isSuccess, isError, data: loginData } = useMutation({
+        mutationFn: (e) => {
+            e.preventDefault();
+            return fetch('api/v1/user/login', {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(Form)
+                body: JSON.stringify(Form) // Assuming `Form` is your form data object
             })
-            console.log(res.url)
-            const data = await res.json()
-            if (data.success == false) {
-                dispatch(SignInFail(data.message))
-            } else {
-                dispatch(SignInSuccess(data))
-                navigate("/")
-            }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success === false) {
+                        console.log(data.message)
+                        throw new Error(data.message);
+                    } else {
+                        const accessToken = data?.data?.accessToken;
+                        if (accessToken) {
+                            localStorage.setItem('token', accessToken);
+                            dispatch(SignInSuccess(data));
+                            // navigate("/");
+                        } else {
+                            dispatch(SignInFail("Invalid username or password"));
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    dispatch(SignInFail("Server Error, Please Try Again"));
+                });
         }
-        catch (error) {
-            dispatch(SignInFail("Server Error, Please Try Again"))
-        }
-    }
+    })
+    
+
 
     return (
         <div className='max-w-lg mx-auto p-3'>
             <h1 className='font-semibold text-3xl text-center my-7'>Sign In</h1>
-            <form className='flex flex-col gap-4' onSubmit={submitHandler}>
+            <form className='flex flex-col gap-4'>
                 <input type='email' placeholder='email' id='Email' className='p-3 bg-slate-100 rounded-lg' onChange={formHandler}></input>
                 <input type='password' placeholder='password' id='Password' className='p-3 bg-slate-100 rounded-lg' onChange={formHandler}></input>
-                <button disabled={loading} className='bg-slate-700 text-white p-2 rounded-lg uppercase hover:opacity-80 disabled:opacity-50'>{loading ? "Loading..." : "Sign-In"}</button>
+                <button disabled={loading} className='bg-slate-700 text-white p-2 rounded-lg uppercase hover:opacity-80 disabled:opacity-50'>{isLoading ? "Loading..." : "Sign-In"}</button>
                 <div className='flex gap-3'>
                     <p className='font-semibold'>Dont Have an account?</p>
-                    <Link to={"/sign-up"}>
-                        <span className='text-blue-600 font-semibold'>Sign up</span>
-                    </Link>
                 </div>
             </form>
             <p className='text-red-900 my-5 font-semibold'>{error ? error || "Something went wrong" : " "}</p>

@@ -48,11 +48,14 @@ export const StudentData = asyncHandler(async (req, res, next) => {
     try {
         // Define filters
         const filters = {};
+        console.log(req.query)
         
         // Gender filter
         if (req.query.gender) {
             filters.Gender = req.query.gender;
         }
+
+        const totalStudents = await Student.countDocuments();
 
         // Semester filter
         if (req.query.semester) {
@@ -62,6 +65,10 @@ export const StudentData = asyncHandler(async (req, res, next) => {
         // Course filter
         if (req.query.course) {
             filters.Course = req.query.course;
+        }
+
+        if (req.query.name) {
+            filters.FullName = { $regex : req.query.name, $options : "i" }
         }
 
         // Pagination
@@ -84,7 +91,7 @@ export const StudentData = asyncHandler(async (req, res, next) => {
 
             console.log(filters)
 
-        res.status(200).json(new ApiResponse(200, { studentsData }, "Data Successfully Fetched"));
+        res.status(200).json(new ApiResponse(200, { studentsData, totalStudents }, "Data Successfully Fetched"));
     } catch (error) {
         // Handle errors
         res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));

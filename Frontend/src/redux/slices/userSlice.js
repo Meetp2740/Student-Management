@@ -3,44 +3,49 @@ import { createSlice } from '@reduxjs/toolkit'
 export const userSlice = createSlice({
     name: 'user',
     initialState: {
-        currentUser : null,
-        loading : false,
-        error : null
+        currentUser: '',
+        loading: false,
+        error: null
     },
     reducers: {
         resetUserState: (state) => {
             state.loading = false;
-            state.error = null;  
+            state.error = null;
         },
-        SignUpStart:  (state) => {
+        SignUpStart: (state) => {
             state.loading = true;
-            state.error = false;  
+            state.error = false;
         },
-        SignUpSuccess:  (state, action) => {
+        SignUpSuccess: (state, action) => {
             state.loading = false;
             state.error = false;
         },
-        SignUpFail:  (state, action) => {
+        SignUpFail: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
-        SignInStart:  (state) => {
+        SignInStart: (state) => {
             state.loading = true;
-            state.error = false;  
+            state.error = false;
         },
-        SignInSuccess:  (state, action) => {
+        SignInSuccess: (state, action) => {
             state.loading = false;
             state.currentUser = action.payload;
             state.error = false;
         },
-        SignInFail:  (state, action) => {
+        SignInFail: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
+        Signout: (state) => {
+            state.currentUser = null;
+            state.loading = null;
+            state.error = null;
+        }
     }
 })
 
-export const { SignUpStart, SignUpSuccess, SignUpFail, SignInStart, SignInSuccess, SignInFail, resetUserState } = userSlice.actions;
+export const { SignUpStart, SignUpSuccess, SignUpFail, SignInStart, SignInSuccess, SignInFail, resetUserState, Signout } = userSlice.actions;
 
 export default userSlice.reducer    

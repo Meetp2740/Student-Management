@@ -5,8 +5,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Student } from "../models/student.model.js";
 import { Faculty } from "../models/faculty.model.js";
 import { Admin } from "../models/admin.model.js";
-import { Course } from "../models/course.model.js";
 import mongoose from "mongoose";
+import { Course } from "../models/course.model.js";
 
 const generateAccessAndRefereshTokens = async (userId) => {
 
@@ -35,8 +35,6 @@ export const userLogin = asyncHandler(async (req, res, next) => {
 
     const { Email, Password } = req.body;
 
-    // console.log(Email)
-
     if (!(Email || Password)) {
         return next(new ApiError(400, "Email and Password are required"))
     }
@@ -56,7 +54,6 @@ export const userLogin = asyncHandler(async (req, res, next) => {
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
 
     const loggedInUser = await User.findById(user._id).select("-Password -refreshToken")
-    const newStudent = await Student.findOne({ user: user._id })
 
     const options = {
         httpOnly: true,
@@ -66,12 +63,11 @@ export const userLogin = asyncHandler(async (req, res, next) => {
 
     res
         .status(200)
-        .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", accessToken, options)
         .json(
             new ApiResponse(200,
                 {
-                    user: loggedInUser, newStudent, accessToken
+                    user: loggedInUser, accessToken
                 },
                 "User Logged In Successfully")
         )
@@ -79,7 +75,8 @@ export const userLogin = asyncHandler(async (req, res, next) => {
 
 export const studentRegister = asyncHandler(async (req, res, next) => {
 
-    const { FirstName, Password, Email, ContactNumber, Role, LastName, Address, Course, Semester, BirthDate, Gender, Avatar } = req.body;
+    const { FirstName, Password, Email, ContactNumber, Role, LastName, Address, Semester, BirthDate, Gender, Avatar } = req.body;
+    const { Course: courseName } = req.body;
 
     if (![FirstName, LastName, Email, ContactNumber, Password, Role].every(field => typeof field === 'string' && field.trim().length > 0)) {
         next(new ApiError(400, "All fields are required"))
@@ -120,16 +117,18 @@ export const studentRegister = asyncHandler(async (req, res, next) => {
             user: id,
             Address: Address,
             FullName: FullName,
-            Course: Course,
+            Course: courseName,
             Semester: Semester,
             BirthDate: BirthDate,
             Avatar: Avatar,
             Gender: Gender
         });
 
+        console.log(newStudent)
+
         await newStudent.save({ session });
 
-        const courseToUpdate = await Course.findOne( { Name : Course} );
+        const courseToUpdate = await Course.findOne();
         console.log(courseToUpdate)
 
         if (courseToUpdate === null || courseToUpdate === undefined) {
@@ -225,6 +224,7 @@ export const adminRegister = asyncHandler(async (req, res, next) => {
 
 export const facultyRegister = asyncHandler(async (req, res, next) => {
     const { FirstName, LastName, Password, Email, ContactNumber, Role, Address, Course, BirthDate, Gender, Avatar, Subject } = req.body;
+    const { Course: courseName } = req.body;
 
     if (![FirstName, LastName, Email, ContactNumber, Password, Role].every(field => typeof field === 'string' && field.trim().length > 0)) {
         return next(new ApiError(400, "All fields are required"));
@@ -267,7 +267,7 @@ export const facultyRegister = asyncHandler(async (req, res, next) => {
             user: id,
             Address: Address,
             FullName: FullName,
-            Course: Course,
+            Course: courseName,
             BirthDate: BirthDate,
             Avatar: Avatar,
             Gender: Gender,
@@ -276,7 +276,7 @@ export const facultyRegister = asyncHandler(async (req, res, next) => {
 
         await newFaculty.save({ session });
 
-        const courseToUpdate = await Course.findOne( { Name : Course} );
+        const courseToUpdate = await Course.findOne({ Name: Course });
 
         if (courseToUpdate === null || courseToUpdate === undefined) {
             session.endSession();
@@ -336,3 +336,6 @@ export const courseRegister = asyncHandler(async (req, res, next) => {
 
 });
 
+export const signOut =  asyncHandler(async (req, res, next) => {
+    res.clearCookie('accessToken', 'refreshToken').status(200).json('Signout success!');
+});

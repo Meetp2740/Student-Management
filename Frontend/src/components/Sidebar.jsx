@@ -30,7 +30,7 @@ function Sidebar({ sidebarOpen }) {
   };
 
   return (
-    <div className={`h-[100vh] max-w-[20rem] min-w-[15rem] p-4 flex-col  bg-[#f5f7f8] lg:block md:block ${sidebarOpen ? "sm:hidden hidden" : ""}`}>
+    <div className={`h-[100vh] max-w-[20rem] min-w-[15rem] p-4 flex-col z-[1000] sticky top-0 bg-[#f5f7f8] lg:block md:block ${sidebarOpen ? "" : "sm:hidden hidden"}`}>
       <div className="mb-2 p-4">
         <Typography color="blue-gray" className="text-3xl font-bold">
           Sidebar
@@ -65,7 +65,7 @@ function Sidebar({ sidebarOpen }) {
                 <ShoppingBagIcon className="h-5 w-5" />
               </ListItemPrefix>
               <Typography color="blue-gray" className="mr-auto font-normal">
-                  Details
+                Details
               </Typography>
             </AccordionHeader>
           </ListItem>
@@ -73,21 +73,21 @@ function Sidebar({ sidebarOpen }) {
             <List className="p-0">
 
               <Link to='/admin/students'>
-              <ListItem>
-                <ListItemPrefix>
-                  <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
-                </ListItemPrefix>
-                Students
-              </ListItem>
+                <ListItem>
+                  <ListItemPrefix>
+                    <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                  </ListItemPrefix>
+                  Students
+                </ListItem>
               </Link>
 
               <Link to='/admin/courses'>
-              <ListItem>
-                <ListItemPrefix>
-                  <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
-                </ListItemPrefix>
-                Courses
-              </ListItem>
+                <ListItem>
+                  <ListItemPrefix>
+                    <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                  </ListItemPrefix>
+                  Courses
+                </ListItem>
               </Link>
 
             </List>

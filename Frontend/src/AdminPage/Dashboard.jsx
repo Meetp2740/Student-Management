@@ -1,17 +1,24 @@
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
 import { CiMenuKebab } from "react-icons/ci";
-import FacultyTableBody from "../components/FacultyTableBody";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useLogin } from "../context/LoginContext";
+import AdminAuth from "../OtherComponents/AdminAuth";
+import handle419Error from "../OtherComponents/handle419Error.js";
+import FacultyTableBody from "../components/FacultyTableBody";
+import FacultyTablediv from "../components/FacultyTablediv.jsx";
+import FacultyTableSkeleton from "../LoadingComponent/FacultyTableSkeleton.jsx"
+import FacultydivSkeleton from "../LoadingComponent/FacultydivSkeleton.jsx";
 
 export default function Dashboard() {
 
     const [today, setToday] = useState('');
-    const [faculty, setFaculty] = useState([]);
-    const [state, setState] = useState({
-        totalAdmin: "", totalFaculty: "", totalStudents: ""
-    })
+    const navigate = useNavigate();
+    const { handleLogout } = useLogin();
 
+    // fetching Date and Time
     useEffect(() => {
         const currentDate = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -19,113 +26,170 @@ export default function Dashboard() {
         setToday(formattedDate);
     }, []);
 
+    // fetching facultyData
+    const { data: facultyData, isLoading: facultyLoading, isError: facultyError } = useQuery({
+        queryKey: ['faculty'],
+        queryFn: async () => {
+            const res = await fetch('/api/v1/admin/dashboard/faculty');
+            const data = await res.json();
 
-    useEffect(() => {
-        const fetchFacultyData = async () => {
-            try {
-                const res = await fetch('/api/v1/admin/dashboard/faculty');
-                const data = await res.json();
-                if (Array.isArray(data.data)) {
-                    setFaculty(data.data);
-                } else {
-                    console.error("Fetched data is not an array:", data);
+            if (res.status === 419) {
+                try {
+                    handle419Error(navigate, handleLogout);
+                } catch (error) {
+                    throw new Error('Failed to fetch faculty data');
                 }
-            } catch (error) {
-                setFaculty("No User Avaiable")
             }
-        };
-        fetchFacultyData();
-    }, []);
 
+            if (!res.ok) {
+                throw new Error('Failed to fetch faculty data');
+            }
 
-    useEffect(() => {
-        const userState = async () => {
+            // Check if the response indicates that the token is not valid
+
+            if (!Array.isArray(data.data)) {
+                throw new Error('Fetched data is not an array');
+            }
+
+            return data.data;
+        },
+        retry: false,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    // fetching User State
+    const { data: userData, isLoading: userLoading, isError: userError } = useQuery({
+        queryKey: ['state'],
+        queryFn: async () => {
             try {
                 const res = await fetch('/api/v1/admin/dashboard/state');
                 const data = await res.json();
-                setState({
-                    totalStudents: data.data.totalStudents,
-                    totalFaculty: data.data.totalFaculty,
-                    totalAdmin: data.data.totalAdmin
-                })
+                return data?.data;
             } catch (error) {
                 console.log(error)
             }
-        }
-        userState()
-    }, [])
+        },
+        refetchOnWindowFocus: false,
+        // staleTime: 1000 * 60 * 5, // 5 minutes
+    })
 
     return (
-        <div className="lg:px-10 md:px-7 sm:px-3 px-4 py-8 bg-[#f5f7f8]">
+        <div className="lg:px-10 md:px-7 sm:px-3 px-4 py-8 bg-[#f5f7f8] overflow-hidden">
             <div>
                 <h1 className="mb-10 text-4xl font-bold text-slate-800">Dashboard</h1>
             </div>
-            <div className="flex flex-wrap gap-4 w-full">
 
-                <div className="flex-auto w-64 h-36 bg-blue-800 rounded-lg flex-shrink-0 py-4 px-4">
-                    <div className="flex items-center justify-between text-white font-semibold text-2xl">
-                        <p>{state.totalStudents}</p>
-                        <CiMenuKebab />
-                    </div>
-                    <p className="text-white">Students</p>
+            {userError ? (
+                <div className="grid sm:grid-cols-4 grid-cols-2 gap-5 text-white">
+                    <div className="bg-gray-500 rounded-lg h-40 shadow flex justify-center items-center text-xl font-extrabold">404 ERROR</div>
+                    <div className="bg-gray-500 rounded-lg h-40 shadow flex justify-center items-center text-xl font-extrabold">404 ERROR</div>
+                    <div className="bg-gray-500 rounded-lg h-40 shadow flex justify-center items-center text-xl font-extrabold">404 ERROR</div>
+                    <div className="bg-gray-500 rounded-lg h-40 shadow flex justify-center items-center text-xl font-extrabold">404 ERROR</div>
                 </div>
 
-                <div className="flex-auto w-64 h-36 bg-orange-500 rounded-lg flex-shrink-0 py-4 px-4">
-                    <div className="flex items-center justify-between text-white font-semibold text-2xl">
-                        <p>{state.totalFaculty}</p>
-                        <CiMenuKebab />
+            ) :
+                userLoading ? (
+                    <div className="grid sm:grid-cols-4 grid-cols-2 gap-2 animate-pulse">
+                        <div className="bg-gray-300 rounded-lg h-40 shadow"></div>
+                        <div className="bg-gray-300 rounded-lg h-40 shadow"></div>
+                        <div className="bg-gray-300 rounded-lg h-40 shadow"></div>
+                        <div className="bg-gray-300 rounded-lg h-40 shadow"></div>
                     </div>
-                    <p className="text-white">Faculty</p>
+                ) : (
+                    <div className="grid sm:grid-cols-4 grid-cols-2 gap-2">
+
+                        <div className="bg-blue-500 h-40 rounded-lg text-white font-semibold text-2xl py-4 px-4 shadow">
+                            <div className="flex items-center justify-between text-white font-semibold text-2xl">
+                                <p>{userData?.totalStudents}</p>
+                                <CiMenuKebab />
+                            </div>
+                            <p className="text-white">Students</p>
+                        </div>
+
+                        <div className="bg-orange-500 h-40 rounded-lg text-white font-semibold text-2xl py-4 px-4 shadow">
+                            <div className="flex items-center justify-between text-white font-semibold text-2xl">
+                                <p>{userData?.totalFaculty}</p>
+                                <CiMenuKebab />
+                            </div>
+                            <p className="text-white">Faculty</p>
+                        </div>
+
+                        <div className="bg-slate-700 h-40 rounded-lg text-white font-semibold text-2xl py-4 px-4 shadow">
+                            <div className="flex items-center justify-between text-white font-semibold text-2xl">
+                                <p>{userData?.totalAdmin}</p>
+                                <CiMenuKebab />
+                            </div>
+                            <p className="text-white">Admin</p>
+                        </div>
+
+                        <div className="bg-black h-40 rounded-lg text-white font-semibold text-2xl py-4 px-4 shadow">
+                            <div className="flex flex-col items-start gap-3 justify-between font-medium text-white text-xl">
+                                <p>{today}</p>
+                                <p>{new Date().toLocaleTimeString()}</p>
+                            </div>
+                        </div>
+
+                    </div>
+                )
+            }
+
+
+            <h1 className="text-xl mb-2 mt-10 font-semibold text-slate-800"> Faculty List </h1>
+
+            <div className="h-screen bg-gray-100">
+
+                <div className="overflow-auto rounded-lg shadow hidden md:block">
+                    <table className="w-full">
+                        {facultyLoading ? (
+                            <FacultyTableSkeleton />
+                        ) : (
+                            <>
+                                <thead className="bg-gray-50 border-b-2 border-gray-200">
+                                    <tr>
+                                        <th className="w-20 p-3 text-sm font-semibold tracking-wide text-left">No.</th>
+                                        <th className="w-20 p-3 text-sm font-semibold tracking-wide text-left">FullName</th>
+                                        <th className="w-24 p-3 text-sm font-semibold tracking-wide text-left">Course</th>
+                                        <th className="w-24 p-3 text-sm font-semibold tracking-wide text-left">Subject</th>
+                                        <th className="w-32 p-3 text-sm font-semibold tracking-wide text-left">ContactNumber</th>
+                                        <th className="w-32 p-3 text-sm font-semibold tracking-wide text-left">Gender</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {facultyData &&
+                                        facultyData.map((faculty, index) => (
+                                            <FacultyTableBody key={index} faculty={faculty} index={index} />
+                                        ))}
+                                </tbody>
+                            </>
+                        )}
+                    </table>
                 </div>
 
-                <div className="flex-auto w-64 h-36 bg-purple-800 rounded-lg flex-shrink-0 py-4 px-4">
-                    <div className="flex items-center justify-between text-white font-semibold text-2xl">
-                        <p>{state.totalAdmin}</p>
-                        <CiMenuKebab />
-                    </div>
-                    <p className="text-white">Admin</p>
-                </div>
+                {facultyError ? (
+                   <div className="bg-slate-400 text-red-800 rounded h-80 justify-center flex items-center text-xl font-extrabold animate-pulse ">
+                   Failed to fetch Faculty data
+               </div>
+                ) :
+                    facultyLoading ? (
+                        <FacultydivSkeleton></FacultydivSkeleton>
+                    )
+                        : (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+                                    {
+                                        facultyData && facultyData.map((faculty, index) => {
+                                            return <FacultyTablediv key={index} faculty={faculty} index={index}></FacultyTablediv>
+                                        })
+                                    }
 
-                <div className="flex-auto w-64 h-36 bg-slate-700 rounded-lg flex-shrink-0 py-4 px-4">
-                    <div className="flex flex-col items-start gap-3 justify-between font-medium text-white text-xl">
-                        <p>{today}</p>
-                        <p>{new Date().toLocaleTimeString()}</p>
-                    </div>
-                </div>
+                                </div>
+                            </>
+                        )
+                }
+
 
             </div>
-
-            <h1 className="text-xl mb-2 mt-10 font-semibold text-slate-800">Faculty List</h1>
-
-            <div className="overflow-auto rounded-lg shadow-md h-96 bg-white">
-                <div className="overflow-x-auto">
-                    {faculty.length <= 0 ? (
-                        <p className="text-center mt-10 text-2xl font-semibold">No User Found</p>
-                    ) : (
-
-                        <table className="min-w-full table-auto sm:w-full md:w-auto lg:w-full">
-                            <thead className="bg-gray-50 border-b-2 border-gray-200">
-                                <tr>
-                                    <th className="w-40 p-3 text-sm font-semibold tracking-wide text-left">Name</th>
-                                    <th className="p-3 text-sm font-semibold tracking-wide text-left">Email</th>
-                                    <th className="w-32 p-3 text-sm font-semibold tracking-wide text-left">ContactNumber</th>
-                                    <th className="w-24 p-3 text-sm font-semibold tracking-wide text-left">Subject</th>
-                                    <th className="w-32 p-3 text-sm font-semibold tracking-wide text-left">Gender</th>
-                                    <th className="w-24 p-3 text-sm font-semibold tracking-wide text-left">Course</th>
-                                </tr>
-                            </thead>
-                            {faculty.map((data, index) => (
-                                <FacultyTableBody key={index} data={data} />
-                            ))}
-                        </table>
-                    )}
-                </div>
-            </div>
-
-            <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores ullam inventore saepe repellendus assumenda tempore, iste at? Officiis iure, asperiores iste blanditiis aspernatur dolor vel illum incidunt tempore omnis quia aut laboriosam sunt fugit? Suscipit officiis ut maiores perferendis totam tempora, nemo maxime provident sunt rem voluptatem quidem, pariatur rerum id nulla sequi nobis ipsum voluptas accusantium ipsam! Debitis iure eligendi deleniti esse reiciendis expedita similique tenetur delectus. A obcaecati placeat itaque voluptatum nulla fuga eum alias assumenda dolor tempore quidem ab, dolores amet molestiae expedita, ex nam maiores quos impedit, vitae quaerat. Sint vero officia culpa sequi, accusamus voluptas doloribus optio hic dicta praesentium recusandae facilis provident? Nemo molestias quibusdam rerum reiciendis esse qui suscipit a et dignissimos inventore quo autem ex tenetur provident laboriosam porro modi neque mollitia earum est ipsa, necessitatibus voluptas veritatis cum. Dolor eveniet doloribus iusto sed harum maiores labore in maxime laudantium magni explicabo, nulla quaerat neque adipisci nam minima laboriosam? Quia distinctio, sapiente commodi blanditiis dolorem velit recusandae similique incidunt illum quaerat voluptate esse! Aut rerum laboriosam, totam dolor officiis atque architecto quis aliquid numquam ipsa magni quia repudiandae necessitatibus magnam obcaecati nulla excepturi qui molestias sed laborum vel vero inventore! Distinctio, perferendis.
-            </div>
-
-        </div>
+        </div >
     )
 }

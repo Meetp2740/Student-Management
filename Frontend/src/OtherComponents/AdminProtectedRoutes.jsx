@@ -6,7 +6,7 @@ const AdminProtectedRoutes = () => {
       const { currentUser } = useSelector((state) => state.user)
       const Auth = AdminAuth()
   
-      return Auth ? <Outlet/> : <Navigate to="/sign-in"/>
+      return Auth ? <Outlet/> : <Navigate to="/"/>
   };
   
   export default AdminProtectedRoutes;

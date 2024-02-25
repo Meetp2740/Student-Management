@@ -9,3 +9,7 @@
 *{
   font-family: "Manrope";
 }
+
+:root {
+  --main-white: #f5f7f8;
+}
