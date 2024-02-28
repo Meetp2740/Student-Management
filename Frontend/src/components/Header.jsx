@@ -2,19 +2,20 @@ import { RiMenu2Fill } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { useSelector } from 'react-redux'
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AdminAuth from "../OtherComponents/AdminAuth";
 import CommonAuth from "../OtherComponents/CommonAuth";
 
 const Header = () => {
 
     let [open, setOpen] = useState(false);
+    const ref = useRef(null);
     const { currentUser } = useSelector((state) => state.user)
     const adminAuth = AdminAuth()
     const commonAuth = CommonAuth()
 
     return (
-        <div className='shadow-md w-full sticky top-0 left-0 z-50'>
+        <div ref={ref} className='shadow-md w-full sticky top-0 left-0 z-50'>
             <div className='md:flex items-center justify-between bg-white py-4 md:px-10 px-7'>
                 <div className='font-bold text-2xl cursor-pointer flex items-centertext-gray-800'>
                     <span className='text-3xl text-indigo-600 mr-1 pt-2'>

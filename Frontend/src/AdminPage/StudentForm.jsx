@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import { FaWpforms } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
 import { SignUpFail, SignUpStart, SignUpSuccess, resetUserState } from "../redux/slices/userSlice";
+import { useMutation } from "@tanstack/react-query";
 
 const StudentForm = () => {
 
-    let { loading, error, currentUser } = useSelector((state) => state.user)
+    // let { loading, error, currentUser } = useSelector((state) => state.user)
     const dispatch = useDispatch()
     const navigate = useNavigate()
+    const [error, setError] = useState({})
     const [course, setCourse] = useState([])
     const [success, setSuccess] = useState(false)
+
+    console.log(error)
 
     const [Form, setForm] = useState({
         FirstName: "",
@@ -26,6 +31,22 @@ const StudentForm = () => {
         Avatar: "",
         Password: "",
         ConfirmPassword: ""
+    })
+
+    const validationSchema = Yup.object({
+        FirstName: Yup.string().required("First Name is required"),
+        LastName: Yup.string().required("Last Name is required"),
+        Email: Yup.string().email("Invalid email format").required("Email is required"),
+        Address: Yup.string().required("Address is required"),
+        ContactNumber: Yup.string().matches(/^\d{10}$/, "Contact Number is required").required("Contact Number is required"),
+        Role: Yup.string().required("Role is required"),
+        Course: Yup.string().required("Course is required"),
+        Semester: Yup.string().required("Semester is required"),
+        BirthDate: Yup.string().required("Birth Date is required"),
+        Gender: Yup.string().required("Gender is required"),
+        Avatar: Yup.string(),
+        Password: Yup.string().required("Password is required").min(5, "Password must be at least 5 characters"),
+        ConfirmPassword: Yup.string().required("Confirm Password is required").oneOf([Yup.ref("Password"), null], "Passwords must match")
     })
 
     const formHandler = async (e) => {
@@ -45,7 +66,6 @@ const StudentForm = () => {
                 const data = await res.json();
                 if (Array.isArray(data.data.courseData)) {
                     setCourse(data.data.courseData);
-                    console.log(course)
                 } else {
                     console.error("Fetched data is not an array:", data);
                 }
@@ -56,43 +76,43 @@ const StudentForm = () => {
         fetchCourseData()
     }, [])
 
-
-    const submitHandler = async (e) => {
-        e.preventDefault()
-
-        // Compare Password and ConfirmPassword fields
-        if (Form.Password !== Form.ConfirmPassword) {
-            dispatch(SignUpFail("Password does not match Confirm Password"));
-            return;
-        }
-
-        try {
-            dispatch(SignUpStart())
+    const handlerStudentRegister = async () => {
+        const res = await fetch('/api/v1/user/student/register', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Form)
+        })
+        const isValid = await validationSchema.validate(Form, { abortEarly: false })
+        const data = await res.json()
+        if (data.success == false) {
             setSuccess(false)
-            const res = await fetch('/api/v1/user/student/register', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(Form)
-            })
-            const data = await res.json()
-            console.log(data)
-            if (data.success == false) {
-                dispatch(SignUpFail(data.message))
-                setSuccess(false)
-            } else {
-                dispatch(SignUpSuccess())
-                data.success ? setSuccess(true) : setSuccess(false)
-            }
-        }
-        catch (error) {
-            console.log(error)
-            dispatch(SignUpFail("Server Error, Please Try Again"))
+        } else {
         }
     }
 
-    console.log(Form)
+    const { mutate: studentRegisterMutation, isLoading, isError, isSuccess, data: registerData, error: registerError = {}, reset: resetRegisterState, status: registerStatus, } = useMutation({
+        mutationFn: handlerStudentRegister,
+        onSuccess: (data) => {
+            console.log(data)
+        },
+        onError: (error) => {
+            const newError = {}
+
+            error.inner.map((err) => {
+                return newError[err.path] = err.message
+            })
+
+            setError(newError)
+        }
+    })
+
+    const submitHandler = (e) => {
+        e.preventDefault()
+        studentRegisterMutation()
+    }
+
 
     return (
         <div className="w-full p-2 sm:p-6 md:p-9">
@@ -108,16 +128,22 @@ const StudentForm = () => {
                     <div className="flex flex-col flex-1">
 
                         <label htmlFor="FirstName">First Name</label>
-                        <input type="text" id="FirstName" name="FirstName" placeholder="Jonathan" onChange={formHandler} className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
-
+                        <input type="text" id="FirstName" name="FirstName" placeholder="Jonathan" onChange={formHandler} className="p-3 bg-slate-100 rounded-lg "></input>
+                        {error.LastName && <p class="mt-2 text-sm text-green-600 dark:text-green-500"><span class="font-medium">Alright!</span> Username available!</p>
+                        }
                         <label htmlFor="LastName">Last Name</label>
-                        <input type="text" id="LastName" name="LastName" placeholder="Doe" onChange={formHandler} className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="text" id="LastName" name="LastName" placeholder="Doe" onChange={formHandler} className="p-3 bg-slate-100 rounded-lg"></input>
+                        {error.LastName && <p className="text-red-500 text-sm lg:mb-10 ">{error.LastName}</p>}
 
                         <label htmlFor="Email">Email Address</label>
-                        <input type="text" id="Email" name="Email" onChange={formHandler} placeholder="jon@doe.com" className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="text" id="Email" name="Email" onChange={formHandler} placeholder="jon@doe.com" className="p-3 bg-slate-100 rounded-lg "></input>
+                        {error.Email && <p className="text-red-500 text-sm ">{error.Email}</p>}
 
                         <label htmlFor="Address">Address</label>
-                        <textarea id="Address" onChange={formHandler} name="Address" placeholder="Enter your Address.." className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></textarea>
+                        <textarea id="Address" onChange={formHandler} name="Address" placeholder="Enter your Address.." className="p-3 bg-slate-100 rounded-lg "></textarea>
+                        {error.Address && <p className="text-red-500 text-sm">{error.Address}</p>}
+
+                        {/* lg:mb-10 md:mb-9 sm:mb-6 mb-4 */}
 
                     </div>
 
@@ -126,10 +152,10 @@ const StudentForm = () => {
                     <div className="flex flex-col flex-1 0">
 
                         <label htmlFor="ContactNumber">Contact Number</label>
-                        <input type="text" id="ContactNumber" name="ContactNumber" onChange={formHandler} placeholder="+91 999 999..." className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="text" id="ContactNumber" name="ContactNumber" onChange={formHandler} placeholder="+91 999 999..." className="p-3 bg-slate-100 rounded-lg "></input>
 
                         <label>Course</label>
-                        <select id="Course" onChange={formHandler} className={`bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400  lg:mb-10 md:mb-9 sm:mb-6 mb-4 `}>
+                        <select id="Course" onChange={formHandler} className={`bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400   `}>
                             <option value="" >Choose a Course</option>
                             {
                                 course.map((course, index) => {
@@ -140,7 +166,7 @@ const StudentForm = () => {
                         </select>
 
                         <label>Semester</label>
-                        <select id="Semester" onChange={formHandler} className={`bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400  lg:mb-10 md:mb-9 sm:mb-6 mb-4 `}>
+                        <select id="Semester" onChange={formHandler} className={`bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400   `}>
                             <option value="" disabled>Choose a semester</option>
                             <option value="Sem-1">Sem-1</option>
                             <option value="Sem-2">Sem-2</option>
@@ -151,7 +177,7 @@ const StudentForm = () => {
                         </select>
 
                         <label htmlFor="BirthDate">BirthDate</label>
-                        <input type="date" id="BirthDate" name="BirthDate" onChange={formHandler} placeholder="BirthDate" className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="date" id="BirthDate" name="BirthDate" onChange={formHandler} placeholder="BirthDate" className="p-3 bg-slate-100 rounded-lg "></input>
 
 
                     </div>
@@ -161,20 +187,20 @@ const StudentForm = () => {
                     <div className="flex flex-col flex-1 0">
 
                         <label htmlFor="Gender">Gender</label>
-                        <select id="Gender" onChange={formHandler} className="bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400  lg:mb-10 md:mb-9 sm:mb-6 mb-4">
+                        <select id="Gender" onChange={formHandler} className="bg-slate-100  text-slate-900 text-sm rounded-lg  block w-full p-2.5 placeholder-slate-400  ">
                             <option value="" >Choose a Gender</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
 
                         <label htmlFor="Avater">Avater</label>
-                        <input type="file" id="Avater" name="Avater" onChange={formHandler} placeholder="Green Tea" className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="file" id="Avater" name="Avater" onChange={formHandler} placeholder="Green Tea" className="p-3 bg-slate-100 rounded-lg "></input>
 
                         <label htmlFor="Password">Password</label>
-                        <input type="Password" id="Password" name="Password" onChange={formHandler} placeholder="Enter Password" className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="Password" id="Password" name="Password" onChange={formHandler} placeholder="Enter Password" className="p-3 bg-slate-100 rounded-lg "></input>
 
                         <label htmlFor="ConfirmPassword">Confirm Password</label>
-                        <input type="text" id="ConfirmPassword" name="ConfirmPassword" onChange={formHandler} placeholder="Confirm Password" className="p-3 bg-slate-100 rounded-lg lg:mb-10 md:mb-9 sm:mb-6 mb-4"></input>
+                        <input type="text" id="ConfirmPassword" name="ConfirmPassword" onChange={formHandler} placeholder="Confirm Password" className="p-3 bg-slate-100 rounded-lg "></input>
 
                     </div>
 
@@ -185,8 +211,8 @@ const StudentForm = () => {
                     {
                         success ?
                             <p className='text-green-600 my-5 font-semibold'>User Created Successful</p>
-                            :
-                            <p className='text-red-900 my-5 font-semibold'>{error ? error || "Something went wrong" : ""}</p>
+                            : <p></p>
+                        // <p className='text-red-900 my-5 font-semibold'>{error ? error || "Something went wrong" : ""}</p>
                     }
                 </div>
             </div>
@@ -196,6 +222,7 @@ const StudentForm = () => {
 
     )
 }
+
 
 export default StudentForm
 

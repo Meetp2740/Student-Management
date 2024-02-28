@@ -18,11 +18,12 @@ import {
   Cog6ToothIcon,
   InboxIcon,
   PowerIcon,
+  LockClosedIcon
 } from "@heroicons/react/24/solid";
 import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 
-function Sidebar({ sidebarOpen }) {
+function Sidebar({ sidebarOpen, toggleSidebar }) {
   const [open, setOpen] = React.useState(0);
 
   const handleOpen = (value) => {
@@ -32,8 +33,9 @@ function Sidebar({ sidebarOpen }) {
   return (
     <div className={`h-[100vh] max-w-[20rem] min-w-[15rem] p-4 flex-col z-[1000] sticky top-0 bg-[#f5f7f8] lg:block md:block ${sidebarOpen ? "" : "sm:hidden hidden"}`}>
       <div className="mb-2 p-4">
-        <Typography color="blue-gray" className="text-3xl font-bold">
-          Sidebar
+        <Typography color="blue-gray" className="text-3xl font-bold flex justify-between items-center">
+          <p>Sidebar</p>
+          <p className="font-bold hover:bg-gray-400 rounded-lg px-2 cursor-pointer block sm:hidden" onClick={() => toggleSidebar()}>X</p>
         </Typography>
       </div>
       <List>

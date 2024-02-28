@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SignInSuccess, SignInFail, resetUserState } from '../redux/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { useLogin } from '../context/LoginContext';
 
 function SignIn() {
-    const { loading, error } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { handleLogin } = useLogin();
 
     const [form, setForm] = useState({
         Email: '',
@@ -55,6 +56,7 @@ function SignIn() {
         mutationFn: handleSignIn,
         onSuccess: (data) => {
             navigate('/');
+            handleLogin();
             dispatch(SignInSuccess(data));
         },
         onError: (error) => {
@@ -65,14 +67,11 @@ function SignIn() {
             }
         }
     })
-
     
     const handleSubmit = (e) => {
         e.preventDefault();
         signInMutation()
     };
-
-    console.log(loginData)
 
     return (
         <div className="max-w-lg mx-auto p-3">

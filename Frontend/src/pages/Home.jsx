@@ -1,6 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import img from '../images/s2.webp'
-import img2 from '../images/s3.webp'
 
 function Home() {
   return (
@@ -13,7 +13,7 @@ function Home() {
           <div className="text-center">
             <p className="text-lg md:text-xl text-white mt-4 uppercase">Shree Shantiniketan College</p>
             <h1 className="text-4xl md:text-6xl text-white font-bold mb-8 mt-10">Welcome to Our Website</h1>
-            <a href="#signup" className="mt-10 top-10 px-6 py-3 bg-red-500 shadow-lg text-white rounded-full uppercase font-bold tracking-wide hover:bg-red-600">Sign In</a>
+            <Link to="/sign-in" className="px-6 py-3 bg-red-500 shadow-lg text-white rounded-full uppercase font-bold tracking-wide hover:bg-red-600">Sign In</Link>
           </div>
         </div>
       </section>

@@ -26,6 +26,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // State to control sidebar visibility
   const { isLoggedIn, handleLogout } = useLogin();
 
+  console.log("LogdinUser : " + isLoggedIn)
+
   const ref = useRef()
 
   const toggleSidebar = () => {
@@ -62,7 +64,7 @@ function App() {
     <div style={{ display: 'flex' }} className='items-start overflow-x-clip'>
       <div style={{ flex: '0' }} className="sticky top-0" ref={ref}>
         {isOnAdminPage &&
-          <Sidebar sidebarOpen={sidebarOpen} />
+          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} toggleSidebar={toggleSidebar} />
         }
       </div>
 
