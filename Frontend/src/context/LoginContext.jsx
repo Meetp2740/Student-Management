@@ -7,8 +7,6 @@ export const useLogin = () => useContext(LoginContext);
 export const LoginProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
 
-  console.log(!!localStorage.getItem('token'))
-
   const handleLogin = () => {
     // Set isLoggedIn to true when user logs in successfully
     setIsLoggedIn(true);

@@ -26,8 +26,6 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // State to control sidebar visibility
   const { isLoggedIn, handleLogout } = useLogin();
 
-  console.log("LogdinUser : " + isLoggedIn)
-
   const ref = useRef()
 
   const toggleSidebar = () => {

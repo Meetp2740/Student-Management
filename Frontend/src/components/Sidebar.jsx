@@ -33,9 +33,9 @@ function Sidebar({ sidebarOpen, toggleSidebar }) {
   return (
     <div className={`h-[100vh] max-w-[20rem] min-w-[15rem] p-4 flex-col z-[1000] sticky top-0 bg-[#f5f7f8] lg:block md:block ${sidebarOpen ? "" : "sm:hidden hidden"}`}>
       <div className="mb-2 p-4">
-        <Typography color="blue-gray" className="text-3xl font-bold flex justify-between items-center">
-          <p>Sidebar</p>
-          <p className="font-bold hover:bg-gray-400 rounded-lg px-2 cursor-pointer block sm:hidden" onClick={() => toggleSidebar()}>X</p>
+        <Typography component={'div'} variant={'h1'} color="blue-gray" className="text-3xl font-bold flex justify-between items-center">
+          <span>Sidebar</span>
+          <p className="font-bold hover:bg-gray-400 rounded-lg px-2 cursor-pointer block sm:block md:hidden lg:hidden" onClick={() => toggleSidebar()}>x</p>
         </Typography>
       </div>
       <List>
@@ -66,7 +66,7 @@ function Sidebar({ sidebarOpen, toggleSidebar }) {
               <ListItemPrefix>
                 <ShoppingBagIcon className="h-5 w-5" />
               </ListItemPrefix>
-              <Typography color="blue-gray" className="mr-auto font-normal">
+              <Typography component={'div'} color="blue-gray" className="mr-auto font-normal">
                 Details
               </Typography>
             </AccordionHeader>
@@ -111,7 +111,7 @@ function Sidebar({ sidebarOpen, toggleSidebar }) {
               <ListItemPrefix className="">
                 <PresentationChartBarIcon className="h-5 w-5" />
               </ListItemPrefix>
-              <Typography color="blue-gray" className="mr-auto font-normal">
+              <Typography component={'div'} color="blue-gray" className="mr-auto font-normal">
                 Form
               </Typography>
             </AccordionHeader>

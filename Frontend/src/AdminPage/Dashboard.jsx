@@ -71,7 +71,7 @@ export default function Dashboard() {
             }
         },
         refetchOnWindowFocus: false,
-        // staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5, // 5 minutes
     })
 
     return (
@@ -135,7 +135,8 @@ export default function Dashboard() {
             }
 
 
-            <h1 className="text-xl mb-2 mt-10 font-semibold text-slate-800"> Faculty List </h1>
+            <p className="text-xl mb-2 mt-10 font-semibold text-slate-800">Faculty List</p>
+
 
             <div className="h-screen bg-gray-100">
 
@@ -167,9 +168,9 @@ export default function Dashboard() {
                 </div>
 
                 {facultyError ? (
-                   <div className="bg-slate-400 text-red-800 rounded h-80 justify-center flex items-center text-xl font-extrabold animate-pulse ">
-                   Failed to fetch Faculty data
-               </div>
+                    <div className="bg-slate-400 text-red-800 rounded h-80 justify-center flex items-center text-xl font-extrabold animate-pulse ">
+                        Failed to fetch Faculty data
+                    </div>
                 ) :
                     facultyLoading ? (
                         <FacultydivSkeleton></FacultydivSkeleton>

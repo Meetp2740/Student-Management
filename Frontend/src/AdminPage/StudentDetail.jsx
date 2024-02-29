@@ -52,7 +52,9 @@ function StudentDetail() {
             } else {
                 throw new Error('Fetched data is not an array');
             }
-        }
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
     })
     //fetching student and adding filtering
 
@@ -72,7 +74,8 @@ function StudentDetail() {
                 console.log(error)
             }
         },
-        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
         placeholderData: keepPreviousData
     })
     //Previous Page Handler
@@ -188,11 +191,11 @@ function StudentDetail() {
                                         </svg>
                                     </div>
                                     <input type="text" id="simple-search"
-                                     onChange={debounce(e => setsearchParams(pre => {
-                                        pre.set('name', e.target.value)
-                                    }),500
-                                    )}
-                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2" placeholder="Search" required=""></input>
+                                        onChange={debounce(e => setsearchParams(pre => {
+                                            pre.set('name', e.target.value)
+                                        }), 500
+                                        )}
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2" placeholder="Search" required=""></input>
                                 </div>
                             </form>
 
